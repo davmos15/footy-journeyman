@@ -273,8 +273,8 @@ tr.bonus td{color:var(--sherrin)}
 <div class="overlay" id="ovHelp"><div class="sheet">
   <button class="closex" data-close>✕</button>
   <h2>How to play</h2>
-  <p>A mystery player's <b>career record</b> is shown one season at a time, starting from their debut year.</p>
-  <p>Every wrong guess prints the <b>next season</b> of their career. Fewer rows, more bragging rights.</p>
+  <p>A mystery player's <b>career record</b> is revealed one season at a time, in a random order.</p>
+  <p>Every wrong guess reveals <b>another season</b> of their career. Fewer seasons, more bragging rights.</p>
   <div class="examplerow">2011&nbsp;&nbsp;■ Club&nbsp;&nbsp;22&nbsp;&nbsp;31&nbsp;&nbsp;14.2</div>
   <p>After each wrong guess you also get <b>clues</b> comparing your guess to the answer — shared club, position, and whether the mystery player debuted earlier or later.</p>
   <p><b>Normal:</b> 8 guesses. <b>Hard mode:</b> 5 guesses, clubs hidden, no clue chips.</p>
@@ -337,6 +337,7 @@ tr.bonus td{color:var(--sherrin)}
    │  SITE CONFIG — edit these.                                        │
    └─────────────────────────────────────────────────────────────────┘ */
 const COFFEE_URL = "https://buymeacoffee.com/nadavmoskow";  // ← set your Buy Me a Coffee URL
+const SITE_URL = "";  // ← canonical URL used in the "Play it yourself" share link; leave "" to use the page's own address
 const DATA_SOURCE_NOTE = "Career data from the 2000 season onwards"; // years auto-filled from data too
 
 const CLUB_COLOURS = {
@@ -397,6 +398,23 @@ function dailyPlayerIdx(n){
   x = ((x >>> 13) ^ x) >>> 0;
   return x % ANSWERS.length;
 }
+// seeded PRNG (xorshift32) so a day's reveal order is the same for everyone
+function seededRng(seed){
+  let x = (seed >>> 0) || 1;
+  return function(){
+    x ^= x << 13; x >>>= 0;
+    x ^= x >>> 17;
+    x ^= x << 5;  x >>>= 0;
+    return x / 4294967296;
+  };
+}
+// Fisher–Yates shuffle of [0..n-1] using rand() (defaults to Math.random)
+function shuffledOrder(n, rand){
+  rand = rand || Math.random;
+  const a = Array.from({length:n}, (_,i)=>i);
+  for (let i=n-1;i>0;i--){ const j = Math.floor(rand()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; }
+  return a;
+}
 function todayKey(){ return "daily-" + dailyIndex(); }
 
 function newGame(mode){
@@ -407,10 +425,15 @@ function newGame(mode){
     idx = Math.floor(Math.random()*ANSWERS.length);
     if (G && ANSWERS[idx].name === G.player.name) idx = (idx+1) % ANSWERS.length;
   }
+  // random order in which seasons are unmasked; seeded per-day so every
+  // daily player sees the same sequence, freshly random in practice
+  const nSeasons = ANSWERS[idx].seasons.length;
+  const rand = mode === "daily" ? seededRng((dailyIndex() * 2654435761) >>> 0 ^ 0x9e3779b9) : Math.random;
+  const revealOrder = shuffledOrder(nSeasons, rand);
   return {
     mode, hard, player: ANSWERS[idx],
     maxGuesses: hard ? HARD_GUESSES : NORMAL_GUESSES,
-    guesses: [], revealed: 1, over:false, won:false
+    guesses: [], revealed: 1, over:false, won:false, revealOrder
   };
 }
 
@@ -431,9 +454,12 @@ function render(){
 
   let rows = "";
   const shown = Math.min(G.revealed, seasons.length);
+  // seasons unmask in a random (per-game) order, but stay sorted by year in the table
+  const order = G.revealOrder || Array.from({length:seasons.length}, (_,i)=>i);
+  const revealedIdx = new Set(order.slice(0, shown));
   for (let i=0;i<seasons.length;i++){
     const s = seasons[i];
-    if (i < shown){
+    if (revealedIdx.has(i)){
       rows += '<tr class="season"><td>'+s.y+'</td><td>'+clubCell(s.club,G.hard,clubOrder.indexOf(s.club))+
               '</td><td>'+s.g+'</td><td>'+s.gl+'</td><td>'+s.d.toFixed(1)+'</td></tr>';
     } else {
@@ -587,11 +613,17 @@ function showResult(){
   $("ovResult").classList.add("open");
 }
 
+function shareUrl(){
+  const u = SITE_URL || (location.origin && location.origin !== "null" ? location.origin : "");
+  return u.replace(/\/+$/, "");
+}
 function shareText(){
   const n = G.won ? G.guesses.length : "X";
   const grid = G.guesses.map(g => g.skip ? "⬜" : (g.correct ? "🟩" : "🟥")).join("");
   const tag = G.mode==="daily" ? "#"+(dailyIndex()+1) : "practice";
-  return "Journeyman Footy "+tag+" "+n+"/"+G.maxGuesses+(G.hard?" (hard)":"")+"\n"+grid+"\n🏉 playjourneyman";
+  const url = shareUrl();
+  return "Journeyman Footy "+tag+" "+n+"/"+G.maxGuesses+(G.hard?" (hard)":"")+"\n"+grid+
+    (url ? "\n🏉 Play: "+url : "\n🏉 playjourneyman");
 }
 function legacyCopy(t){
   try{
