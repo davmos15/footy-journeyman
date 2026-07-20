@@ -454,12 +454,15 @@ function render(){
 
   let rows = "";
   const shown = Math.min(G.revealed, seasons.length);
-  // seasons unmask in a random (per-game) order, but stay sorted by year in the table
   const order = G.revealOrder || Array.from({length:seasons.length}, (_,i)=>i);
-  const revealedIdx = new Set(order.slice(0, shown));
-  for (let i=0;i<seasons.length;i++){
-    const s = seasons[i];
-    if (revealedIdx.has(i)){
+  const allShown = shown >= seasons.length;
+  // Revealed seasons fill from the top in the (random) order they were revealed,
+  // so the first season revealed is always the first row. Once every season is
+  // out, settle into chronological order for a clean full-career read.
+  const shownIdx = allShown ? seasons.map((_,i)=>i) : order.slice(0, shown);
+  for (let r=0;r<seasons.length;r++){
+    if (r < shownIdx.length){
+      const s = seasons[shownIdx[r]];
       rows += '<tr class="season"><td>'+s.y+'</td><td>'+clubCell(s.club,G.hard,clubOrder.indexOf(s.club))+
               '</td><td>'+s.g+'</td><td>'+s.gl+'</td><td>'+s.d.toFixed(1)+'</td></tr>';
     } else {
