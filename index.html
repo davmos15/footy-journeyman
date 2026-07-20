@@ -80,8 +80,11 @@ main{flex:1; width:100%; max-width:560px; margin:0 auto; padding:8px 16px 140px}
 table{width:100%; border-collapse:collapse; font-family:'IBM Plex Mono',monospace; font-size:13px}
 thead th{
   text-align:right; padding:10px 10px; font-weight:600; font-size:10px; letter-spacing:1px;
-  color:var(--dim); border-bottom:1px solid var(--line); text-transform:uppercase;
+  color:var(--dim); border-bottom:1px solid var(--line); text-transform:uppercase; cursor:help;
 }
+/* full stat words when there's room; abbreviations on narrow screens */
+.hlong{display:none} .hshort{display:inline}
+@media (min-width:560px){ .hlong{display:inline} .hshort{display:none} }
 thead th:first-child, td:first-child{text-align:left}
 thead th:nth-child(2), td:nth-child(2){text-align:left}
 td{padding:10px 10px; border-bottom:1px solid var(--line); text-align:right; white-space:nowrap}
@@ -242,7 +245,13 @@ tr.bonus td{color:var(--sherrin)}
   </div>
   <div class="card">
     <table aria-live="polite">
-      <thead><tr><th>Year</th><th>Club</th><th>Gms</th><th>Gls</th><th>Disp</th></tr></thead>
+      <thead><tr>
+        <th data-info="The season (year)." title="The season (year).">Year</th>
+        <th data-info="Club played for that season." title="Club played for that season.">Club</th>
+        <th data-info="Games played that season." title="Games played that season."><span class="hlong">Games</span><span class="hshort">Gms</span></th>
+        <th data-info="Total goals kicked that season." title="Total goals kicked that season."><span class="hlong">Goals</span><span class="hshort">Gls</span></th>
+        <th data-info="Average disposals per game that season." title="Average disposals per game that season."><span class="hlong">Disposals</span><span class="hshort">Disp</span></th>
+      </tr></thead>
       <tbody id="tbody"></tbody>
     </table>
   </div>
@@ -659,6 +668,10 @@ $("btnShare").addEventListener("click", async () => {
 $("btnAgain").addEventListener("click", () => {
   $("ovResult").classList.remove("open");
   startGame("practice");
+});
+// tap a column header to explain it (hover shows the same via title=)
+document.querySelectorAll("thead th[data-info]").forEach(th => {
+  th.addEventListener("click", () => toast(th.dataset.info));
 });
 
 /* ===================== stats / settings UI ===================== */
