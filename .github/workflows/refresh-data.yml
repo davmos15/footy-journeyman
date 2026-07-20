@@ -1,0 +1,31 @@
+name: Refresh player data
+
+# Rebuilds players.json from fitzRoy's redistributed AFL Tables dataset.
+# Runs weekly during the season + on manual trigger. Commits only if data changed;
+# the commit triggers Netlify's auto-deploy.
+
+on:
+  schedule:
+    - cron: "0 20 * * 1"   # Mondays 20:00 UTC (~6-7am Tue Melbourne)
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Install deps
+        run: pip install pyreadr pandas
+      - name: Download latest dataset
+        run: curl -sL "https://raw.githubusercontent.com/jimmyday12/fitzRoy_data/main/data-raw/afl_tables_playerstats/afldata.rda" -o afldata.rda
+      - name: Build players.json
+        run: python3 build_players.py afldata.rda players.json
+      - name: Commit if changed
+        run: |
+          git config user.name "data-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add players.json
+          git diff --cached --quiet || git commit -m "chore: refresh player data $(date -u +%F)"
+          git push
