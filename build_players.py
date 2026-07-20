@@ -78,7 +78,7 @@ for pid, g in df.groupby("ID"):
             "b": int(s["Behinds"].sum()),         # season total
             "d": round(float(s["Disposals"].mean()), 1),  # per game
             "m": round(float(s["Marks"].mean()), 1),      # per game
-            "h": round(float(s["Hit.Outs"].mean()), 1),   # per game
+            "h": int(s["Hit.Outs"].sum()),                # season total
         })
     seasons.sort(key=lambda r: r["y"])
     total_g = sum(s["g"] for s in seasons)

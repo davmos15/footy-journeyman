@@ -253,7 +253,7 @@ tr.bonus td{color:var(--sherrin)}
         <th data-info="Total behinds that season." title="Total behinds that season."><span class="hlong">Behinds</span><span class="hshort">Bh</span></th>
         <th data-info="Average disposals per game that season." title="Average disposals per game that season."><span class="hlong">Disposals</span><span class="hshort">Ds</span></th>
         <th data-info="Average marks per game that season." title="Average marks per game that season."><span class="hlong">Marks</span><span class="hshort">Mk</span></th>
-        <th data-info="Average hit-outs per game that season." title="Average hit-outs per game that season."><span class="hlong">Hit-outs</span><span class="hshort">HO</span></th>
+        <th data-info="Total hit-outs that season." title="Total hit-outs that season."><span class="hlong">Hit-outs</span><span class="hshort">HO</span></th>
       </tr></thead>
       <tbody id="tbody"></tbody>
     </table>
@@ -287,8 +287,8 @@ tr.bonus td{color:var(--sherrin)}
   <h2>How to play</h2>
   <p>A mystery player's <b>career record</b> is revealed one season at a time, in a random order.</p>
   <p>Every wrong guess reveals <b>another season</b> of their career. Fewer seasons, more bragging rights.</p>
-  <div class="examplerow">2011&nbsp;&nbsp;■ SYD&nbsp;&nbsp;22&nbsp;&nbsp;31&nbsp;&nbsp;9&nbsp;&nbsp;14.2&nbsp;&nbsp;4.1&nbsp;&nbsp;0.2</div>
-  <p>Each season shows <b>games</b>, <b>goals</b> and <b>behinds</b> (season totals), then <b>disposals</b>, <b>marks</b> and <b>hit-outs</b> (per-game averages). Tap any column heading — or a club code — for what it means.</p>
+  <div class="examplerow">2011&nbsp;&nbsp;■ SYD&nbsp;&nbsp;22&nbsp;&nbsp;31&nbsp;&nbsp;9&nbsp;&nbsp;14.2&nbsp;&nbsp;4.1&nbsp;&nbsp;5</div>
+  <p>Each season shows <b>games</b>, <b>goals</b>, <b>behinds</b> and <b>hit-outs</b> (season totals), then <b>disposals</b> and <b>marks</b> (per-game averages). Tap any column heading — or a club code — for what it means.</p>
   <p>After each wrong guess you also get <b>clues</b> comparing your guess to the answer — shared club, position, and whether the mystery player debuted earlier or later.</p>
   <p><b>Normal:</b> 8 guesses. <b>Hard mode:</b> 5 guesses, clubs hidden, no clue chips.</p>
   <p>One daily player for everyone, or hit Practice for unlimited random players.</p>
@@ -488,7 +488,7 @@ function render(){
       const num = v => (v == null ? "–" : v.toFixed(1));
       rows += '<tr class="season"><td>'+s.y+'</td><td>'+clubCell(s.club,G.hard,clubOrder.indexOf(s.club))+
               '</td><td>'+s.g+'</td><td>'+s.gl+'</td><td>'+(s.b ?? "–")+'</td><td>'+num(s.d)+
-              '</td><td>'+num(s.m)+'</td><td>'+num(s.h)+'</td></tr>';
+              '</td><td>'+num(s.m)+'</td><td>'+(s.h ?? "–")+'</td></tr>';
     } else {
       rows += '<tr class="masked"><td>··</td><td>––––</td><td>··</td><td>··</td><td>··</td><td>··</td><td>··</td><td>··</td></tr>';
     }
