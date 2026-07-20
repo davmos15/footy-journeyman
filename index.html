@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Journeyman — Footy</title>
 <meta name="description" content="Guess the footy player from their career, one season at a time.">
+<meta name="theme-color" content="#1A2820">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0iIzFBMjgyMCIvPjxnIHRyYW5zZm9ybT0icm90YXRlKC00MCAxNiAxNikiPjxlbGxpcHNlIGN4PSIxNiIgY3k9IjE2IiByeD0iNi42IiByeT0iMTIuMiIgZmlsbD0iI0YyQzIzMCIgc3Ryb2tlPSIjMTcyNTFEIiBzdHJva2Utd2lkdGg9IjEuNSIvPjxsaW5lIHgxPSIxNiIgeTE9IjYuNCIgeDI9IjE2IiB5Mj0iMjUuNiIgc3Ryb2tlPSIjMTcyNTFEIiBzdHJva2Utd2lkdGg9IjEuNSIvPjxsaW5lIHgxPSIxMi44IiB5MT0iMTEuNSIgeDI9IjE5LjIiIHkyPSIxMS41IiBzdHJva2U9IiMxNzI1MUQiIHN0cm9rZS13aWR0aD0iMS41Ii8+PGxpbmUgeDE9IjEyLjYiIHkxPSIxNiIgeDI9IjE5LjQiIHkyPSIxNiIgc3Ryb2tlPSIjMTcyNTFEIiBzdHJva2Utd2lkdGg9IjEuNSIvPjxsaW5lIHgxPSIxMi44IiB5MT0iMjAuNSIgeDI9IjE5LjIiIHkyPSIyMC41IiBzdHJva2U9IiMxNzI1MUQiIHN0cm9rZS13aWR0aD0iMS41Ii8+PC9nPjwvc3ZnPg==">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0iIzFBMjgyMCIvPjxnIHRyYW5zZm9ybT0icm90YXRlKC00MCAxNiAxNikiPjxlbGxpcHNlIGN4PSIxNiIgY3k9IjE2IiByeD0iNi42IiByeT0iMTIuMiIgZmlsbD0iI0YyQzIzMCIgc3Ryb2tlPSIjMTcyNTFEIiBzdHJva2Utd2lkdGg9IjEuNSIvPjxsaW5lIHgxPSIxNiIgeTE9IjYuNCIgeDI9IjE2IiB5Mj0iMjUuNiIgc3Ryb2tlPSIjMTcyNTFEIiBzdHJva2Utd2lkdGg9IjEuNSIvPjxsaW5lIHgxPSIxMi44IiB5MT0iMTEuNSIgeDI9IjE5LjIiIHkyPSIxMS41IiBzdHJva2U9IiMxNzI1MUQiIHN0cm9rZS13aWR0aD0iMS41Ii8+PGxpbmUgeDE9IjEyLjYiIHkxPSIxNiIgeDI9IjE5LjQiIHkyPSIxNiIgc3Ryb2tlPSIjMTcyNTFEIiBzdHJva2Utd2lkdGg9IjEuNSIvPjxsaW5lIHgxPSIxMi44IiB5MT0iMjAuNSIgeDI9IjE5LjIiIHkyPSIyMC41IiBzdHJva2U9IiMxNzI1MUQiIHN0cm9rZS13aWR0aD0iMS41Ii8+PC9nPjwvc3ZnPg==">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-4W2RH8JMV4"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-4W2RH8JMV4');
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=Archivo+Black&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -41,6 +52,9 @@ header{
 .hbtns{display:flex; gap:4px}
 .hbtn{width:40px;height:40px;border-radius:8px;display:grid;place-items:center;font-size:18px}
 .hbtn:active{background:var(--felt)}
+a.hbtn{color:inherit;text-decoration:none}
+.coffeebtn{font-size:17px}
+.coffeebtn:hover{background:var(--felt)}
 
 /* ---------- mode tabs ---------- */
 .tabs{display:flex; gap:8px; padding:8px 16px; max-width:560px; width:100%; margin:0 auto}
@@ -209,6 +223,7 @@ tr.bonus td{color:var(--sherrin)}
 <header>
   <div class="wordmark">JOURNEYMAN<small>FOOTY EDITION</small></div>
   <div class="hbtns">
+    <a class="hbtn coffeebtn" id="coffeeMain" href="#" target="_blank" rel="noopener" aria-label="Buy me a coffee" title="Buy me a coffee">☕</a>
     <button class="hbtn" id="btnHelp" aria-label="How to play">?</button>
     <button class="hbtn" id="btnStats" aria-label="Your stats">▤</button>
     <button class="hbtn" id="btnSettings" aria-label="Settings">⚙</button>
@@ -235,9 +250,6 @@ tr.bonus td{color:var(--sherrin)}
   <div class="guesses" id="guessList"></div>
 
   <footer class="sitefoot">
-    <a class="coffee" id="coffeeMain" href="#" target="_blank" rel="noopener">
-      <span class="cup">☕</span> Buy me a coffee
-    </a>
     <div class="yrs" id="dataYears"></div>
   </footer>
 </main>
