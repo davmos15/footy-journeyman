@@ -51,12 +51,11 @@ print("Loading", SRC, "…")
 df = pyreadr.read_r(SRC)["afldata"]
 
 # numeric coercion
-for c in ["Season","Disposals","Goals","Hit.Outs"]:
+for c in ["Season","Disposals","Goals","Behinds","Marks","Hit.Outs"]:
     df[c] = pd.to_numeric(df[c], errors="coerce")
 df = df[df["Season"] >= 2000].copy()          # modern era only
-df["Goals"] = df["Goals"].fillna(0)
-df["Disposals"] = df["Disposals"].fillna(0)
-df["Hit.Outs"] = df["Hit.Outs"].fillna(0)
+for c in ["Goals","Disposals","Behinds","Marks","Hit.Outs"]:
+    df[c] = df[c].fillna(0)
 df["Playing.for"] = df["Playing.for"].map(club)
 
 # stable display name; disambiguate collisions later via ID+debut
@@ -75,8 +74,11 @@ for pid, g in df.groupby("ID"):
             "y": int(yr),
             "club": cl,
             "g": int(len(s)),
-            "gl": int(s["Goals"].sum()),
-            "d": round(float(s["Disposals"].mean()), 1),
+            "gl": int(s["Goals"].sum()),         # season total
+            "b": int(s["Behinds"].sum()),         # season total
+            "d": round(float(s["Disposals"].mean()), 1),  # per game
+            "m": round(float(s["Marks"].mean()), 1),      # per game
+            "h": round(float(s["Hit.Outs"].mean()), 1),   # per game
         })
     seasons.sort(key=lambda r: r["y"])
     total_g = sum(s["g"] for s in seasons)
