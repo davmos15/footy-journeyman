@@ -69,7 +69,7 @@ a.hbtn{color:inherit;text-decoration:none}
 main{flex:1; width:100%; max-width:560px; margin:0 auto; padding:8px 16px 140px}
 .meta{
   display:flex; justify-content:space-between; align-items:baseline;
-  font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--dim);
+  font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--flag);
   padding:6px 2px;
 }
 .meta b{color:var(--sherrin);font-weight:600}
@@ -81,7 +81,9 @@ table{width:100%; border-collapse:collapse; font-family:'IBM Plex Mono',monospac
 thead th{
   text-align:right; padding:9px 5px; font-weight:600; font-size:10px; letter-spacing:.5px;
   color:var(--dim); border-bottom:1px solid var(--line); text-transform:uppercase; cursor:help;
+  vertical-align:bottom;
 }
+.qual{display:block; font-size:8px; font-weight:600; letter-spacing:.5px; color:var(--dim); opacity:.55; margin-bottom:2px}
 /* full stat words when there's room; abbreviations on narrow screens */
 .hlong{display:none} .hshort{display:inline}
 @media (min-width:560px){ .hlong{display:inline} .hshort{display:none} table{font-size:13px} thead th{padding:10px 7px} td{padding:10px 7px} }
@@ -248,12 +250,12 @@ tr.bonus td{color:var(--sherrin)}
       <thead><tr>
         <th data-info="The season (year)." title="The season (year).">Year</th>
         <th data-info="Club played for that season (tap a club for its full name)." title="Club played for that season.">Club</th>
-        <th data-info="Games played that season." title="Games played that season."><span class="hlong">Games</span><span class="hshort">Gm</span></th>
-        <th data-info="Total goals kicked that season." title="Total goals kicked that season."><span class="hlong">Goals</span><span class="hshort">Gl</span></th>
-        <th data-info="Total behinds that season." title="Total behinds that season."><span class="hlong">Behinds</span><span class="hshort">Bh</span></th>
-        <th data-info="Average disposals per game that season." title="Average disposals per game that season."><span class="hlong">Disposals</span><span class="hshort">Ds</span></th>
-        <th data-info="Average marks per game that season." title="Average marks per game that season."><span class="hlong">Marks</span><span class="hshort">Mk</span></th>
-        <th data-info="Total hit-outs that season." title="Total hit-outs that season."><span class="hlong">Hit-outs</span><span class="hshort">HO</span></th>
+        <th data-info="Games played that season." title="Games played that season."><span class="qual"><span class="hlong">total</span><span class="hshort">tot</span></span><span class="hlong">Games</span><span class="hshort">Gm</span></th>
+        <th data-info="Total goals kicked that season." title="Total goals kicked that season."><span class="qual"><span class="hlong">total</span><span class="hshort">tot</span></span><span class="hlong">Goals</span><span class="hshort">Gl</span></th>
+        <th data-info="Total behinds that season." title="Total behinds that season."><span class="qual"><span class="hlong">total</span><span class="hshort">tot</span></span><span class="hlong">Behinds</span><span class="hshort">Bh</span></th>
+        <th data-info="Average disposals per game that season." title="Average disposals per game that season."><span class="qual">avg</span><span class="hlong">Disposals</span><span class="hshort">Ds</span></th>
+        <th data-info="Average marks per game that season." title="Average marks per game that season."><span class="qual">avg</span><span class="hlong">Marks</span><span class="hshort">Mk</span></th>
+        <th data-info="Total hit-outs that season." title="Total hit-outs that season."><span class="qual"><span class="hlong">total</span><span class="hshort">tot</span></span><span class="hlong">Hit-outs</span><span class="hshort">HO</span></th>
       </tr></thead>
       <tbody id="tbody"></tbody>
     </table>
@@ -501,7 +503,9 @@ function render(){
   }
   tbody.innerHTML = rows;
 
-  $("metaLeft").textContent = "CAREER RECORD · " + seasons.length + " SEASONS";
+  const nClubs = (p.clubs || []).length;
+  $("metaLeft").textContent = "CAREER RECORD · " + seasons.length + " SEASONS · " +
+    nClubs + (nClubs === 1 ? " CLUB" : " CLUBS");
   $("metaRight").innerHTML = G.hard ? '<b>HARD</b>' : (G.mode==="daily" ? 'DAILY <b>#'+(dailyIndex()+1)+'</b>' : 'PRACTICE');
   const left = G.maxGuesses - G.guesses.length;
   $("remain").innerHTML = G.over ? (G.won ? 'Got it. Come back tomorrow.' : 'Better luck tomorrow.')
