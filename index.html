@@ -647,7 +647,15 @@ async function finishGame(){
     if (!isDone(already)){
       stats.played++;
       if (G.won){
-        stats.wins++; stats.streak++; stats.maxStreak = Math.max(stats.maxStreak, stats.streak);
+        stats.wins++;
+        // a streak only survives if the previous win was yesterday; skipping a
+        // day starts it over. Stats saved before lastDailyWon was recorded have
+        // no history to judge, so they're given the benefit of the doubt.
+        const d = dailyIndex();
+        const continues = stats.lastDailyWon == null || stats.lastDailyWon === d - 1;
+        stats.streak = continues ? stats.streak + 1 : 1;
+        stats.lastDailyWon = d;
+        stats.maxStreak = Math.max(stats.maxStreak, stats.streak);
         stats.dist[G.guesses.length] = (stats.dist[G.guesses.length]||0)+1;
       } else stats.streak = 0;
       await sSet("stats", stats);
@@ -720,10 +728,17 @@ document.querySelectorAll("thead th[data-info]").forEach(th => {
 });
 
 /* ===================== stats / settings UI ===================== */
+// The stored streak is only refreshed when a day is played, so a run broken by
+// a missed day has to be spotted at read time. A win yesterday is still live —
+// today can extend it — but anything older is done.
+function currentStreak(){
+  if (stats.lastDailyWon == null) return stats.streak;
+  return dailyIndex() - stats.lastDailyWon <= 1 ? stats.streak : 0;
+}
 function renderStats(){
   const wp = stats.played ? Math.round(100*stats.wins/stats.played) : 0;
   $("statGrid").innerHTML = [
-    [stats.played,"Played"],[wp+"%","Win rate"],[stats.streak,"Streak"],[stats.maxStreak,"Best streak"]
+    [stats.played,"Played"],[wp+"%","Win rate"],[currentStreak(),"Streak"],[stats.maxStreak,"Best streak"]
   ].map(([v,l]) => '<div class="statbox"><div class="v">'+v+'</div><div class="l">'+l+'</div></div>').join("");
   const max = Math.max(1, ...Object.values(stats.dist));
   let html = "";
