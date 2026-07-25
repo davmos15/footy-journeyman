@@ -155,6 +155,7 @@ tr.bonus td{color:var(--sherrin)}
   border:1px solid var(--line);border-radius:8px;padding:9px 4px;background:var(--felt)}
 .auxbtn:active{border-color:var(--sherrin);color:var(--flag)}
 .auxbtn:disabled{opacity:.3}
+.auxbtn[hidden]{display:none}
 .guessrow.skip{border-left:3px solid var(--line);color:var(--dim)}
 .sharefallback{display:none;margin-top:12px;background:var(--felt);border:1px solid var(--line);
   border-radius:8px;padding:12px;font-family:'IBM Plex Mono',monospace;font-size:12px;
@@ -285,6 +286,7 @@ tr.bonus td{color:var(--sherrin)}
     <div class="aux">
       <button class="auxbtn" id="btnClue">Next clue (uses a guess)</button>
       <button class="auxbtn" id="btnGiveUp">Give up</button>
+      <button class="auxbtn" id="btnResult" hidden>View result &amp; share</button>
     </div>
   </div>
 </div>
@@ -446,6 +448,15 @@ function shuffledOrder(n, rand){
   return a;
 }
 function todayKey(){ return "daily-" + dailyIndex(); }
+// A day's record is stored under todayKey() from the first guess onwards, so an
+// unfinished daily survives a refresh. done:false marks a game still in play.
+// Records written before in-progress saving existed have no `done` field and
+// are always complete.
+const isDone = rec => !!rec && rec.done !== false;
+async function saveDailyProgress(){
+  if (!G || G.mode !== "daily" || G.over) return;
+  await sSet(todayKey(), {done:false, hard:G.hard, guesses:G.guesses, revealed:G.revealed});
+}
 
 function newGame(mode){
   const hard = settings.hard;
@@ -525,10 +536,14 @@ function render(){
     return '<div class="guessrow '+(g.correct?'right':'wrong')+'"><span>'+g.name+'</span><span class="n">'+(g.correct?'✔':'✘ '+(i+1))+'</span></div>';
   }).join("");
 
-  // aux buttons
+  // aux buttons — once the game is over the clue/give-up pair is replaced by a
+  // way back into the result sheet, so the day stays shareable all day
   const maxReveal = seasons.length + (G.hard ? 0 : 2);
   $("btnClue").disabled = G.over || G.revealed >= maxReveal || (G.guesses.length >= G.maxGuesses - 1);
   $("btnGiveUp").disabled = G.over;
+  $("btnClue").hidden = G.over;
+  $("btnGiveUp").hidden = G.over;
+  $("btnResult").hidden = !G.over;
 }
 
 function renderChips(guessed){
@@ -602,6 +617,7 @@ async function submitGuess(){
     renderChips(p);
     G.revealed++;
     if (G.guesses.length >= G.maxGuesses){ G.over = true; G.won = false; G.revealed = 999; await finishGame(); }
+    else await saveDailyProgress();
   }
   render();
 }
@@ -612,8 +628,10 @@ $("btnClue").addEventListener("click", async () => {
   G.revealed++;
   chipsEl.innerHTML = "";
   if (G.guesses.length >= G.maxGuesses){ G.over = true; G.won = false; G.revealed = 999; await finishGame(); }
+  else await saveDailyProgress();
   render();
 });
+$("btnResult").addEventListener("click", showResult);
 $("btnGiveUp").addEventListener("click", async () => {
   if (G.over) return;
   G.over = true; G.won = false;
@@ -624,15 +642,16 @@ $("btnGiveUp").addEventListener("click", async () => {
 async function finishGame(){
   G.revealed = 999; // open the whole table
   if (G.mode === "daily"){
+    // only count the day once, even though an in-progress record already exists
     const already = await sGet(todayKey());
-    if (!already){
+    if (!isDone(already)){
       stats.played++;
       if (G.won){
         stats.wins++; stats.streak++; stats.maxStreak = Math.max(stats.maxStreak, stats.streak);
         stats.dist[G.guesses.length] = (stats.dist[G.guesses.length]||0)+1;
       } else stats.streak = 0;
       await sSet("stats", stats);
-      await sSet(todayKey(), {won:G.won, n:G.guesses.length, hard:G.hard, guesses:G.guesses});
+      await sSet(todayKey(), {done:true, won:G.won, n:G.guesses.length, hard:G.hard, guesses:G.guesses});
     }
   }
   setTimeout(showResult, 650);
@@ -660,7 +679,8 @@ function shareText(){
   const tag = G.mode==="daily" ? "#"+(dailyIndex()+1) : "practice";
   const url = shareUrl();
   return "Journeyman Footy "+tag+" "+n+"/"+G.maxGuesses+(G.hard?" (hard)":"")+"\n"+grid+
-    (url ? "\n🏉 Play: "+url : "\n🏉 playjourneyman");
+    (url ? "\n🏉 Play: "+url : "\n🏉 playjourneyman")+
+    (COFFEE_URL ? "\n☕ Enjoying the game? Support the project: "+COFFEE_URL : "");
 }
 function legacyCopy(t){
   try{
@@ -748,13 +768,26 @@ async function startGame(mode){
   tabPractice.classList.toggle("on", mode==="practice");
   chipsEl.innerHTML = ""; 
   if (mode === "daily"){
-    const done = await sGet(todayKey());
-    if (done){
-      // rebuild finished state so the day's result is viewable, not replayable
+    const rec = await sGet(todayKey());
+    if (rec){
+      // newGame reproduces the day's player and reveal order deterministically,
+      // so the stored guesses can just be replayed on top of a fresh game.
       G = newGame("daily");
-      G.hard = done.hard; G.maxGuesses = done.hard?HARD_GUESSES:NORMAL_GUESSES;
-      G.guesses = done.guesses || []; G.over = true; G.won = done.won; G.revealed = 999;
-      render(); return;
+      G.hard = rec.hard; G.maxGuesses = rec.hard?HARD_GUESSES:NORMAL_GUESSES;
+      G.guesses = rec.guesses || [];
+      if (isDone(rec)){
+        // rebuild finished state so the day's result is viewable, not replayable
+        G.over = true; G.won = rec.won; G.revealed = 999;
+        render(); return;
+      }
+      // resume an unfinished daily where it left off
+      G.revealed = rec.revealed || 1;
+      render();
+      // restore the feedback chips for the most recent real guess
+      const last = [...G.guesses].reverse().find(g => !g.skip);
+      const lastPlayer = last && POOL.find(pl => pl.name === last.name);
+      if (lastPlayer) renderChips(lastPlayer);
+      return;
     }
   }
   G = newGame(mode);
