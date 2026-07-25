@@ -409,9 +409,9 @@ function careerBlurb(p){ return p.games+' games · '+p.goals+' goals · '+p.firs
 const NORMAL_GUESSES = 8, HARD_GUESSES = 5;
 const EPOCH = new Date(2026, 6, 1); // daily #1 = 1 Jul 2026
 
-let mem = {}; // in-memory fallback
-async function sGet(k){ try{ const r = await window.storage.get(k); return r ? JSON.parse(r.value) : null; }catch(e){ return mem[k] ?? null; } }
-async function sSet(k,v){ mem[k]=v; try{ await window.storage.set(k, JSON.stringify(v)); }catch(e){} }
+let mem = {}; // in-memory fallback when localStorage is unavailable (e.g. private mode)
+async function sGet(k){ try{ const raw = localStorage.getItem(k); return raw != null ? JSON.parse(raw) : (mem[k] ?? null); }catch(e){ return mem[k] ?? null; } }
+async function sSet(k,v){ mem[k]=v; try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
 
 let settings = { hard:false, light:false };
 let stats = { played:0, wins:0, streak:0, maxStreak:0, dist:{}, lastDailyWon:null };
