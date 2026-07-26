@@ -6,7 +6,9 @@ Guess the mystery AFL player from their career — revealed one season at a time
 A daily puzzle for footy tragics: read the clubs, the games, the goals, and the
 numbers, and name the journeyman before you run out of guesses.
 
-After the siren? There's a sister game: **[Journeyman — NBA](https://nba-journeyman.netlify.app)**.
+After the siren? There are sister games:
+**[Journeyman — NBA](https://nba-journeyman.netlify.app)** and
+**[Globetrotter — Countries](https://country-globetrotter.netlify.app)** (guess the country from five clues).
 
 ## How to play
 
