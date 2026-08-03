@@ -7,8 +7,10 @@ A daily puzzle for footy tragics: read the clubs, the games, the goals, and the
 numbers, and name the journeyman before you run out of guesses.
 
 After the siren? There are sister games:
+**[Journeyman — MLB](https://mlb-journeyman.netlify.app)**,
 **[Journeyman — NBA](https://nba-journeyman.netlify.app)** and
-**[Globetrotter — Countries](https://country-globetrotter.netlify.app)** (guess the country from five clues).
+**[Globetrotter — Countries](https://country-globetrotter.netlify.app)** (guess the country from five clues)
+— all reachable from the *Play our other games* button at the top of the page.
 
 ## How to play
 
