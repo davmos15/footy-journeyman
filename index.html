@@ -358,6 +358,10 @@ tr.bonus td{color:var(--sherrin)}
     <button class="toggle" id="tglLight" role="switch" aria-label="Light theme"></button>
   </div>
   <div class="setrow">
+    <div><div class="t">Years in search</div><div class="d">Show each player's seasons active next to their name in the search list.</div></div>
+    <button class="toggle" id="tglAcYears" role="switch" aria-label="Years in search"></button>
+  </div>
+  <div class="setrow">
     <div><div class="t">About</div><div class="d">Journeyman is a fan-made stats game covering AFL seasons from 2000 onwards. Not affiliated with any league or club. Player stats are public facts via AFL Tables &amp; fitzRoy; no logos or player images are used. If you enjoy it, the ☕ button on the main screen helps keep it running.</div></div>
   </div>
 </div></div>
@@ -447,7 +451,7 @@ let mem = {}; // in-memory fallback when localStorage is unavailable (e.g. priva
 async function sGet(k){ try{ const raw = localStorage.getItem(k); return raw != null ? JSON.parse(raw) : (mem[k] ?? null); }catch(e){ return mem[k] ?? null; } }
 async function sSet(k,v){ mem[k]=v; try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
 
-let settings = { hard:false, light:false };
+let settings = { hard:false, light:false, acYears:false };
 let stats = { played:0, wins:0, streak:0, maxStreak:0, dist:{}, lastDailyWon:null };
 let G = null; // current game
 
@@ -608,7 +612,8 @@ function openAc(list){
   acItems = list; acHl = -1;
   if (!list.length){ ac.classList.remove("open"); ac.innerHTML=""; return; }
   ac.innerHTML = list.map((p,i) =>
-    '<button class="acitem" data-i="'+i+'">'+p.name+'<small>'+p.first+'–'+p.last+'</small></button>'
+    '<button class="acitem" data-i="'+i+'">'+p.name+
+    (settings.acYears ? '<small>'+p.first+'–'+p.last+'</small>' : '')+'</button>'
   ).join("");
   ac.classList.add("open");
 }
@@ -788,6 +793,7 @@ function applyTheme(){ document.body.dataset.theme = settings.light ? "light" : 
 function renderSettings(){
   $("tglHard").classList.toggle("on", settings.hard);
   $("tglLight").classList.toggle("on", settings.light);
+  $("tglAcYears").classList.toggle("on", settings.acYears);
 }
 $("tglHard").addEventListener("click", async () => {
   settings.hard = !settings.hard; renderSettings(); await sSet("settings", settings);
@@ -795,6 +801,9 @@ $("tglHard").addEventListener("click", async () => {
 });
 $("tglLight").addEventListener("click", async () => {
   settings.light = !settings.light; renderSettings(); applyTheme(); await sSet("settings", settings);
+});
+$("tglAcYears").addEventListener("click", async () => {
+  settings.acYears = !settings.acYears; renderSettings(); await sSet("settings", settings);
 });
 
 /* ===================== modals / tabs / toast ===================== */
@@ -847,7 +856,7 @@ async function startGame(mode){
 /* ===================== init ===================== */
 (async function init(){
   await loadData();
-  const s = await sGet("settings"); if (s) settings = s;
+  const s = await sGet("settings"); if (s) settings = Object.assign(settings, s);
   const st = await sGet("stats"); if (st) stats = st;
   applyTheme(); renderSettings();
   $("coffeeMain").href = COFFEE_URL;
